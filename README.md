@@ -71,7 +71,7 @@ agent = Agent(
 
 result = agent.run("Explain how AI agents work in three sentences.")
 print(result.output)
-print(result.usage)          # token usage when the API reports it
+print(result.usage)  # token usage when the API reports it
 ```
 
 ## Tools
@@ -79,10 +79,12 @@ print(result.usage)          # token usage when the API reports it
 ```python
 from gemini_agent_toolkit import Agent, tool
 
+
 @tool
 def calculate_total(price: float, quantity: int) -> float:
     """Calculate a purchase total."""
     return price * quantity
+
 
 agent = Agent(
     name="Shopping Assistant",
@@ -103,6 +105,7 @@ Useful decorator options:
 @tool(requires_approval=True, approval_reason="Deletes user data")
 def delete_file(file_path: str) -> str: ...
 
+
 @tool(idempotent=True, timeout=5.0, tags=("files",))
 def read_file(file_path: str) -> str: ...
 ```
@@ -113,15 +116,17 @@ def read_file(file_path: str) -> str: ...
 from pydantic import BaseModel
 from gemini_agent_toolkit import Agent
 
+
 class ResearchResult(BaseModel):
     title: str
     summary: str
     key_points: list[str]
 
+
 agent = Agent(name="Research Agent", instructions="Produce structured research summaries.")
 result = agent.run("Explain the benefits of Python automation.", output_schema=ResearchResult)
 
-print(result.output.summary)      # a validated ResearchResult instance
+print(result.output.summary)  # a validated ResearchResult instance
 ```
 
 Validation failures raise `StructuredOutputError` with the offending payload attached, so you can
@@ -148,17 +153,20 @@ an execution guard so a retry cannot silently run the same call twice. Exhausted
 ```python
 from gemini_agent_toolkit import Agent, tool, PendingPolicy
 
+
 @tool(requires_approval=True)
 def delete_file(file_path: str) -> str:
     """Delete a file after human approval."""
     import os
+
     os.remove(file_path)
     return f"deleted {file_path}"
+
 
 agent = Agent(
     name="File Management Agent",
     tools=[delete_file],
-    approval_policy=PendingPolicy(),   # safe default is DenyAllPolicy
+    approval_policy=PendingPolicy(),  # safe default is DenyAllPolicy
 )
 
 result = agent.run("Delete the old report.")
@@ -166,7 +174,7 @@ if result.status is RunStatus.PENDING_APPROVAL:
     request = result.pending_approvals[0]
     print(request.tool_name, request.arguments, request.expires_at)
     # ... human decides ...
-    agent.approval.approve(request.token)     # or .reject(request.token)
+    agent.approval.approve(request.token)  # or .reject(request.token)
     result = agent.resume(result.execution_id)
 ```
 

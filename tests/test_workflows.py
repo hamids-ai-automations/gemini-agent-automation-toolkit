@@ -68,7 +68,9 @@ def test_denied_step_fails_the_workflow() -> None:
     workflow = make_workflow("deploy")
     workflow.add_step("ship", lambda state: "done", requires_approval=True)
 
-    result = WorkflowRunner(workflow, approval_manager=ApprovalManager(policy=DenyAllPolicy())).run()
+    result = WorkflowRunner(
+        workflow, approval_manager=ApprovalManager(policy=DenyAllPolicy())
+    ).run()
 
     assert result.status is RunStatus.FAILED
     assert "rejected" in (result.error or "")

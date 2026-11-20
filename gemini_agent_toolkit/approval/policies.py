@@ -8,14 +8,17 @@ policy must be chosen explicitly.
 from __future__ import annotations
 
 import warnings
-from typing import Any, Callable, Protocol, runtime_checkable
+from collections.abc import Callable
+from typing import Any, Protocol, runtime_checkable
 
 from ..models import ApprovalRequest, ApprovalStatus
 
 
 def describe_action(request: ApprovalRequest) -> str:
     """Human readable one-liner describing the proposed action."""
-    args = ", ".join(f"{key}={value!r}" for key, value in request.arguments.items()) or "no arguments"
+    args = (
+        ", ".join(f"{key}={value!r}" for key, value in request.arguments.items()) or "no arguments"
+    )
     return f"{request.tool_name}({args})"
 
 
@@ -77,7 +80,12 @@ class CallablePolicy:
 
     name = "callable"
 
-    def __init__(self, predicate: Callable[[ApprovalRequest], bool | ApprovalStatus], *, name: str | None = None) -> None:
+    def __init__(
+        self,
+        predicate: Callable[[ApprovalRequest], bool | ApprovalStatus],
+        *,
+        name: str | None = None,
+    ) -> None:
         if not callable(predicate):
             raise TypeError("predicate must be callable")
         self._predicate = predicate

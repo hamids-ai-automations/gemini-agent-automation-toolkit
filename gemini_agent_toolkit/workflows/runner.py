@@ -9,8 +9,9 @@ orchestration framework.
 
 from __future__ import annotations
 
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Callable, Sequence
+from typing import Any
 
 from ..approval.manager import ApprovalManager
 from ..exceptions import ApprovalError, StepFailedError, WorkflowError
@@ -64,7 +65,7 @@ class Workflow:
         requires_approval: bool = False,
         retry_policy: RetryPolicy | None = None,
         description: str = "",
-    ) -> "Workflow":
+    ) -> Workflow:
         """Append a step and return ``self`` so calls can be chained."""
         if any(step.name == name for step in self.steps):
             raise WorkflowError(f"duplicate step name: {name}")
@@ -149,17 +150,30 @@ class WorkflowRunner:
                     )
 
             policy = step.retry_policy or self.retry_policy
+            current_step = step
+
+            def _run_step(current_step: Step = current_step) -> Any:
+                return current_step.action(state)
+
+            def _on_step_retry(
+                attempt: int,
+                error: BaseException,
+                delay: float,
+                current_step: Step = current_step,
+            ) -> None:
+                self._logger.event(
+                    "step_retry",
+                    workflow=self.workflow.name,
+                    step=current_step.name,
+                    attempt=attempt + 1,
+                    error=f"{type(error).__name__}: {error}",
+                )
+
             try:
                 value = execute_with_retry(
-                    lambda: step.action(state),
+                    _run_step,
                     policy,
-                    on_retry=lambda attempt, error, delay: self._logger.event(
-                        "step_retry",
-                        workflow=self.workflow.name,
-                        step=step.name,
-                        attempt=attempt + 1,
-                        error=f"{type(error).__name__}: {error}",
-                    ),
+                    on_retry=_on_step_retry,
                 )
             except Exception as exc:  # noqa: BLE001 - converted to a failed result
                 record.status = RunStatus.FAILED

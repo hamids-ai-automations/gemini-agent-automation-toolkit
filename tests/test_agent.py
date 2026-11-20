@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import pytest
+from conftest import ScriptedClient, build_agent, text_response, tool_response
 
 from gemini_agent_toolkit import ApprovalStatus, RunStatus, tool
 from gemini_agent_toolkit.exceptions import RecursiveToolCallError, ToolLimitExceededError
 from gemini_agent_toolkit.models import ApprovalRequest
 from gemini_agent_toolkit.reliability.recovery import ExecutionGuard
-
-from conftest import ScriptedClient, build_agent, text_response, tool_response
 
 
 @tool
@@ -74,9 +73,7 @@ def test_tool_call_then_answer_feeds_result_back() -> None:
 
     second_call_contents = client.calls[1]["contents"]
     assert any(
-        isinstance(turn, dict)
-        and "function_response" in str(turn)
-        and "42" in str(turn)
+        isinstance(turn, dict) and "function_response" in str(turn) and "42" in str(turn)
         for turn in second_call_contents
     )
 

@@ -10,8 +10,9 @@ from __future__ import annotations
 import json
 import logging as _logging
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, Mapping
+from typing import Any
 
 LOGGER_NAME = "gemini_agent_toolkit"
 REDACTED = "[REDACTED]"
@@ -56,9 +57,7 @@ def redact(value: Any, *, extra_values: tuple[str, ...] = (), depth: int = 0) ->
             elif SENSITIVE_KEY_PATTERN.search(key_text):
                 result[key_text] = REDACTED
             else:
-                result[key_text] = redact(
-                    item, extra_values=extra_values, depth=depth + 1
-                )
+                result[key_text] = redact(item, extra_values=extra_values, depth=depth + 1)
         return result
 
     if isinstance(value, (list, tuple, set)):
@@ -105,7 +104,9 @@ class ExecutionLogger:
     def _emit(self, level: int, event: str, fields: dict[str, Any]) -> None:
         payload = redact(fields, extra_values=self.redact_values)
         if self.json_output:
-            self._logger.log(level, json.dumps({"event": event, "logger": self.name, **payload}, default=str))
+            self._logger.log(
+                level, json.dumps({"event": event, "logger": self.name, **payload}, default=str)
+            )
         else:
             detail = " ".join(f"{key}={value!r}" for key, value in payload.items())
             self._logger.log(level, "%s %s", event, detail)
@@ -134,7 +135,9 @@ def configure_logging(
     logger.setLevel(getattr(_logging, level.upper(), _logging.INFO))
     if handler is not None:
         handler.setFormatter(
-            _logging.Formatter('{"event": "%(message)s"}') if json_output else _logging.Formatter("%(levelname)s %(message)s")
+            _logging.Formatter('{"event": "%(message)s"}')
+            if json_output
+            else _logging.Formatter("%(levelname)s %(message)s")
         )
         logger.addHandler(handler)
     elif not logger.handlers:

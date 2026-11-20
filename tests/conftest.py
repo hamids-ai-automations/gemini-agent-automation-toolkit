@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 import pytest
 
@@ -50,7 +51,9 @@ def build_agent(client: ScriptedClient, tools: Iterable[Any] | None = None, **kw
         retry_jitter=0.0,
         **{k: v for k, v in kwargs.items() if k in {f for f in AgentConfig.__dataclass_fields__}},
     )
-    agent_kwargs = {k: v for k, v in kwargs.items() if k not in {f for f in AgentConfig.__dataclass_fields__}}
+    agent_kwargs = {
+        k: v for k, v in kwargs.items() if k not in {f for f in AgentConfig.__dataclass_fields__}
+    }
     return Agent(
         name="Test Agent",
         instructions="You are a test agent.",

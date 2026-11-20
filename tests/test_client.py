@@ -48,7 +48,13 @@ def test_build_request_config_declares_tools_and_schema() -> None:
     client = GeminiClient()
     config = client.build_request_config(
         system_instruction=None,
-        tools=[{"name": "add", "description": "add", "parameters": {"type": "object", "properties": {}}}],
+        tools=[
+            {
+                "name": "add",
+                "description": "add",
+                "parameters": {"type": "object", "properties": {}},
+            }
+        ],
         response_schema={"type": "object", "properties": {"x": {"type": "string"}}},
     )
     assert config.response_mime_type == "application/json"

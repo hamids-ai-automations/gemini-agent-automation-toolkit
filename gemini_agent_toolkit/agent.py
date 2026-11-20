@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from .approval.manager import ApprovalManager
 from .approval.policies import ApprovalPolicy, DenyAllPolicy, describe_action
@@ -12,12 +13,10 @@ from .context import ConversationContext
 from .exceptions import (
     ApprovalError,
     ClientError,
-    RecursiveToolCallError,
     RetryExhaustedError,
     StructuredOutputError,
-    ToolkitError,
-    ToolArgumentError,
     ToolError,
+    ToolkitError,
     ToolLimitExceededError,
 )
 from .logging.logger import ExecutionLogger
@@ -256,7 +255,11 @@ class Agent:
                     )
                 except ToolLimitExceededError as exc:
                     result = self._finish(
-                        execution_id, RunStatus.TOOL_LIMIT_REACHED, records, started, usage,
+                        execution_id,
+                        RunStatus.TOOL_LIMIT_REACHED,
+                        records,
+                        started,
+                        usage,
                         error=str(exc),
                     )
                     return result
@@ -282,7 +285,11 @@ class Agent:
                         pending=[p.to_dict() for p in pending],
                     )
                     return self._finish(
-                        execution_id, RunStatus.PENDING_APPROVAL, records, started, usage,
+                        execution_id,
+                        RunStatus.PENDING_APPROVAL,
+                        records,
+                        started,
+                        usage,
                         pending=pending,
                     )
 
@@ -303,14 +310,24 @@ class Agent:
                         details=structured.describe_errors(exc),
                     )
                     return self._finish(
-                        execution_id, RunStatus.FAILED, records, started, usage,
-                        error=str(exc), text=text,
+                        execution_id,
+                        RunStatus.FAILED,
+                        records,
+                        started,
+                        usage,
+                        error=str(exc),
+                        text=text,
                     )
                 self._append_text_turn(contents, text)
                 context.turns = list(contents)
                 return self._finish(
-                    execution_id, RunStatus.SUCCESS, records, started, usage,
-                    output=output, text=text,
+                    execution_id,
+                    RunStatus.SUCCESS,
+                    records,
+                    started,
+                    usage,
+                    output=output,
+                    text=text,
                 )
 
             self._append_text_turn(contents, text)
@@ -398,7 +415,9 @@ class Agent:
             try:
                 spec = self.registry.get(call.name)
             except ToolError as exc:
-                record = ToolCallRecord(name=call.name, arguments=dict(call.args), ok=False, error=str(exc))
+                record = ToolCallRecord(
+                    name=call.name, arguments=dict(call.args), ok=False, error=str(exc)
+                )
                 records.append(record)
                 turns.append(make_function_response(call, {"error": str(exc)}))
                 self._logger.warning("tool_unknown", tool=call.name, error=str(exc))
@@ -606,7 +625,9 @@ class Agent:
             tool_calls=len(records),
             error=error,
             usage=usage.to_dict() if usage else None,
-            duration_seconds=(result.finished_at - started).total_seconds() if result.finished_at else None,
+            duration_seconds=(result.finished_at - started).total_seconds()
+            if result.finished_at
+            else None,
         )
         return result
 
@@ -618,9 +639,7 @@ class Agent:
         usage: UsageSummary | None,
         error: str,
     ) -> AgentResult:
-        return self._finish(
-            execution_id, RunStatus.FAILED, records, started, usage, error=error
-        )
+        return self._finish(execution_id, RunStatus.FAILED, records, started, usage, error=error)
 
 
 __all__ = ["Agent"]

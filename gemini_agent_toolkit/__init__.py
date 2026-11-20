@@ -23,7 +23,7 @@ from .approval.policies import (
     TerminalPolicy,
 )
 from .client import GeminiClient, LLMClient
-from .config import DEFAULT_MODEL, API_KEY_ENV_VAR, AgentConfig
+from .config import API_KEY_ENV_VAR, DEFAULT_MODEL, AgentConfig
 from .context import ConversationContext
 from .exceptions import (
     ApprovalError,
@@ -42,10 +42,10 @@ from .exceptions import (
     StepFailedError,
     StructuredOutputError,
     TimeoutExceededError,
-    ToolkitError,
     ToolArgumentError,
     ToolError,
     ToolExecutionError,
+    ToolkitError,
     ToolLimitExceededError,
     ToolNotFoundError,
     TransientClientError,

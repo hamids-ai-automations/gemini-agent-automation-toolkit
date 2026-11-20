@@ -9,8 +9,9 @@ from __future__ import annotations
 
 import inspect
 import re
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Iterable, get_type_hints
+from typing import Any, cast, get_type_hints
 
 from pydantic import BaseModel, ConfigDict, ValidationError, create_model
 
@@ -78,7 +79,9 @@ def build_input_model(func: Callable[..., Any], *, model_name: str) -> type[Base
             _FieldInfo(default=default, description=description),
         )
 
-    model = create_model(f"{model_name}_Input", __config__=ConfigDict(extra="forbid"), **fields)
+    model = create_model(  # type: ignore[call-overload]
+        f"{model_name}_Input", __config__=ConfigDict(extra="forbid"), **fields
+    )
     return model
 
 
@@ -134,7 +137,7 @@ class ToolSpec:
         timeout: float | None = None,
         approval_reason: str | None = None,
         tags: Iterable[str] = (),
-    ) -> "ToolSpec":
+    ) -> ToolSpec:
         if not callable(func):
             raise ToolError(f"tool target must be callable, got {type(func)!r}")
         tool_name = name or func.__name__
@@ -179,7 +182,8 @@ class ToolSpec:
             arguments = {}
         if not isinstance(arguments, dict):
             raise ToolArgumentError(
-                f"arguments for tool '{self.name}' must be an object, got {type(arguments).__name__}"
+                f"arguments for tool '{self.name}' must be an object, "
+                f"got {type(arguments).__name__}"
             )
         try:
             model = self.input_model.model_validate(arguments)
@@ -231,7 +235,7 @@ def tool(
 
     def decorate(target: Callable[..., Any]) -> Callable[..., Any]:
         spec = ToolSpec.from_function(target, **options)  # type: ignore[arg-type]
-        setattr(target, "__gemini_tool__", spec)
+        cast(Any, target).__gemini_tool__ = spec
         return target
 
     if func is not None:

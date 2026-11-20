@@ -10,7 +10,11 @@ from gemini_agent_toolkit.logging import REDACTED, ExecutionLogger, redact
 
 def test_secret_fields_are_redacted() -> None:
     redacted = redact(
-        {"api_key": "abc", "nested": {"authorization": "Bearer x", "ok": 1}, "list": [{"token": "t"}]}
+        {
+            "api_key": "abc",
+            "nested": {"authorization": "Bearer x", "ok": 1},
+            "list": [{"token": "t"}],
+        }
     )
     assert redacted["api_key"] == REDACTED
     assert redacted["nested"]["authorization"] == REDACTED

@@ -7,8 +7,10 @@ and the run fails fast with :class:`TimeoutExceededError`.
 
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
-from typing import Any, Callable, TypeVar
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FutureTimeout
+from typing import Any, TypeVar
 
 from ..exceptions import TimeoutExceededError
 
@@ -34,9 +36,7 @@ def run_with_timeout(
         return future.result(timeout=timeout)
     except FutureTimeout as exc:
         future.cancel()
-        raise TimeoutExceededError(
-            f"{label} timed out after {timeout:g}s"
-        ) from exc
+        raise TimeoutExceededError(f"{label} timed out after {timeout:g}s") from exc
     finally:
         executor.shutdown(wait=False, cancel_futures=True)
 

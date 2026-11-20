@@ -60,7 +60,7 @@ class ConversationContext:
         """
         return [dict(turn) if isinstance(turn, dict) else turn for turn in self.turns]
 
-    def copy(self) -> "ConversationContext":
+    def copy(self) -> ConversationContext:
         return ConversationContext(
             turns=self.to_list(), max_turns=self.max_turns, system_note=self.system_note
         )

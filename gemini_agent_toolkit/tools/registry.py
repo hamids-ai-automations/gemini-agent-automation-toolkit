@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, Iterable, Iterator
+import builtins
+from collections.abc import Callable, Iterable, Iterator
+from typing import Any
 
 from ..exceptions import ToolError, ToolNotFoundError
 from .decorators import ToolSpec, get_tool_spec
@@ -40,9 +42,21 @@ class ToolRegistry:
             if not callable(target):
                 raise ToolError(f"cannot register non-callable object: {type(target)!r}")
             existing = get_tool_spec(target)
-            if existing is not None and not any(
-                v is not None for v in (name, description, requires_approval, idempotent, timeout, approval_reason)
-            ) and not tuple(tags):
+            if (
+                existing is not None
+                and not any(
+                    v is not None
+                    for v in (
+                        name,
+                        description,
+                        requires_approval,
+                        idempotent,
+                        timeout,
+                        approval_reason,
+                    )
+                )
+                and not tuple(tags)
+            ):
                 spec = existing
             else:
                 base = existing
@@ -51,7 +65,9 @@ class ToolRegistry:
                     name=name or (base.name if base else None),
                     description=description or (base.description if base else None),
                     requires_approval=(
-                        base.requires_approval if requires_approval is None and base else bool(requires_approval)
+                        base.requires_approval
+                        if requires_approval is None and base
+                        else bool(requires_approval)
                     ),
                     idempotent=(
                         base.idempotent if idempotent is None and base else bool(idempotent)
@@ -94,7 +110,7 @@ class ToolRegistry:
         return list(self._tools.values())
 
     # -- model payload ---------------------------------------------------- #
-    def declarations(self) -> list[dict[str, Any]]:
+    def declarations(self) -> builtins.list[dict[str, Any]]:
         """Function declaration dicts ready to be handed to the API."""
         return [spec.declaration() for spec in self._tools.values()]
 

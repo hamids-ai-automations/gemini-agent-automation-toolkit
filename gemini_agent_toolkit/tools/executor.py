@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import json
 import time
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from ..exceptions import ToolArgumentError, ToolExecutionError
 from ..models import FunctionCallRequest, ToolCallRecord
@@ -91,9 +92,7 @@ class ToolExecutor:
             return record, {"error": str(exc)}
         except BaseException as exc:  # noqa: BLE001 - converted into a record
             wrapped = (
-                exc
-                if isinstance(exc, ToolExecutionError)
-                else ToolExecutionError(spec.name, exc)
+                exc if isinstance(exc, ToolExecutionError) else ToolExecutionError(spec.name, exc)
             )
             record.error = str(wrapped)
             record.duration_ms = (self._clock() - started) * 1000

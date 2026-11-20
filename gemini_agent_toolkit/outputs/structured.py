@@ -16,10 +16,7 @@ class StructuredOutput:
 
     def __init__(self, schema: type[BaseModel]) -> None:
         if not is_pydantic_model(schema):
-            raise TypeError(
-                "output_schema must be a pydantic BaseModel subclass, "
-                f"got {schema!r}"
-            )
+            raise TypeError(f"output_schema must be a pydantic BaseModel subclass, got {schema!r}")
         self.schema = schema
 
     # -- request side ----------------------------------------------------- #
@@ -87,8 +84,7 @@ def prepare_output_schema(output_schema: type[BaseModel] | None) -> StructuredOu
         return None
     if not is_pydantic_model(output_schema):
         raise TypeError(
-            "output_schema must be a pydantic BaseModel subclass, "
-            f"got {output_schema!r}"
+            f"output_schema must be a pydantic BaseModel subclass, got {output_schema!r}"
         )
     return StructuredOutput(output_schema)
 

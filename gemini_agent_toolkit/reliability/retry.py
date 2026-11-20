@@ -4,20 +4,22 @@ from __future__ import annotations
 
 import random
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
 from ..exceptions import (
     ApprovalError,
     ConfigError,
     PermanentClientError,
     RetryExhaustedError,
-    RetryExhaustedError as _RetryExhaustedError,
     StructuredOutputError,
-    TimeoutExceededError,
-    ToolkitError,
     ToolArgumentError,
+    ToolkitError,
     TransientClientError,
+)
+from ..exceptions import (
+    RetryExhaustedError as _RetryExhaustedError,
 )
 
 #: HTTP-ish codes that are worth retrying.
@@ -156,7 +158,7 @@ class RetryPolicy:
             raise ConfigError("delays must be >= 0")
 
     @classmethod
-    def from_config(cls, config: Any) -> "RetryPolicy":
+    def from_config(cls, config: Any) -> RetryPolicy:
         """Build a policy from an :class:`~gemini_agent_toolkit.config.AgentConfig`."""
         return cls(
             max_attempts=max(1, int(config.max_retries)),

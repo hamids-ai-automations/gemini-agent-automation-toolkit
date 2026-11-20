@@ -12,9 +12,10 @@ Guarantees enforced here:
 from __future__ import annotations
 
 import secrets
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
-from typing import Any, Callable
+from typing import Any
 
 from ..exceptions import (
     ApprovalExpiredError,
@@ -71,7 +72,8 @@ class ApprovalManager:
         )
         self._requests[request.token] = request
 
-        decision = (policy or self.policy).decide(request)
+        active_policy: ApprovalPolicy = policy or self.policy or DenyAllPolicy()
+        decision = active_policy.decide(request)
         if decision is not ApprovalStatus.PENDING:
             self._apply(request, decision, decided_by="policy")
         return request
@@ -120,7 +122,9 @@ class ApprovalManager:
             return False
         if tool_name is not None and request.tool_name != tool_name:
             return False
-        if arguments is not None and request.fingerprint != arguments_fingerprint(tool_name or request.tool_name, arguments):
+        if arguments is not None and request.fingerprint != arguments_fingerprint(
+            tool_name or request.tool_name, arguments
+        ):
             return False
         return True
 

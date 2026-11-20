@@ -97,7 +97,7 @@ class AgentConfig:
         return (key,) if key else ()
 
     # -- helpers ---------------------------------------------------------- #
-    def with_overrides(self, **overrides: Any) -> "AgentConfig":
+    def with_overrides(self, **overrides: Any) -> AgentConfig:
         """Return a copy with only the provided (non-None) values replaced."""
         clean = {k: v for k, v in overrides.items() if v is not None}
         if not clean:

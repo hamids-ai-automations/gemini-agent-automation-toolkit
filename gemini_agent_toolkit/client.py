@@ -12,7 +12,9 @@ Design notes
 
 from __future__ import annotations
 
-from typing import Any, Callable, Protocol, runtime_checkable
+import functools
+from collections.abc import Callable
+from typing import Any, Protocol, runtime_checkable
 
 from .config import AgentConfig
 from .exceptions import (
@@ -207,11 +209,13 @@ class GeminiClient:
         )
 
         if self._generate_call is not None:
-            invoke = lambda: self._generate_call(model=model, contents=contents, config=config)
+            invoke = functools.partial(
+                self._generate_call, model=model, contents=contents, config=config
+            )
         else:
             client = self._ensure_client()
-            invoke = lambda: client.models.generate_content(
-                model=model, contents=contents, config=config
+            invoke = functools.partial(
+                client.models.generate_content, model=model, contents=contents, config=config
             )
 
         try:
@@ -227,9 +231,10 @@ class GeminiClient:
         calls, raw_content = _function_calls_of(response)
         text = _text_of(response)
         if text is None and not calls:
+            candidates = getattr(response, "candidates", None) or []
+            finish_reason = getattr(candidates[0], "finish_reason", None) if candidates else None
             raise ModelResponseError(
-                "model returned neither text nor tool calls "
-                f"(finish reason: {getattr(response.candidates[0], 'finish_reason', None) if getattr(response, 'candidates', None) else None})"
+                f"model returned neither text nor tool calls (finish reason: {finish_reason})"
             )
 
         return LLMResponse(

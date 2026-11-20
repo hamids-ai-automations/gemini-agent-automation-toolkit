@@ -193,7 +193,9 @@ class StepRecord:
         return {
             "name": self.name,
             "status": self.status.value,
-            "output": self.output if not hasattr(self.output, "model_dump") else self.output.model_dump(),
+            "output": self.output
+            if not hasattr(self.output, "model_dump")
+            else self.output.model_dump(),
             "error": self.error,
             "attempts": self.attempts,
             "started_at": self.started_at.isoformat(),

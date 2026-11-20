@@ -42,9 +42,7 @@ class ExecutionGuard:
             ToolLimitExceededError: the run or call-repeat budget is exhausted.
         """
         if tool_name in self._stack:
-            raise RecursiveToolCallError(
-                f"tool '{tool_name}' tried to invoke itself recursively"
-            )
+            raise RecursiveToolCallError(f"tool '{tool_name}' tried to invoke itself recursively")
         if self.total_calls >= self.max_tool_calls:
             raise ToolLimitExceededError(
                 f"tool call budget of {self.max_tool_calls} exhausted for this run"
