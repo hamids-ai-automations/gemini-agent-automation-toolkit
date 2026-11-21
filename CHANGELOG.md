@@ -1,10 +1,10 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - Unreleased
+## [0.1.0] - 2026-11-20
 
 First public release. The API is usable but may change before `1.0.0`.
 
@@ -30,6 +30,6 @@ First public release. The API is usable but may change before `1.0.0`.
 - Documentation: README, `docs/RESEARCH.md`, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, six runnable
   examples.
 - Tooling: `pyproject.toml` packaging, pytest suite (85 tests, fully offline), GitHub Actions CI on
-  Python 3.10–3.12.
+  Python 3.10â€“3.12.
 
 [0.1.0]: https://github.com/hamids-ai-automations/gemini-agent-automation-toolkit/releases/tag/v0.1.0
